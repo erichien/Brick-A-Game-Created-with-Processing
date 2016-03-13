@@ -1,0 +1,552 @@
+int clicked = 0;
+int pressed = 0;
+int speed = 6;
+float moveX = 0;
+float moveY = 0;
+int dirX = 1;
+int dirY = 1;
+float cursorX = 0;
+float cursorY = 0;
+float ballPositionX = 300;
+float ballPositionY = 300;
+PVector vector, vectorX, vectorY, tempVectorX, tempVectorY;
+PVector angleV1, angleV2;
+PVector reboundUnitVectorX, reboundUnitVectorY;
+PVector showX = new PVector(1,0);
+PVector showY = new PVector(0,1);
+float reboundDistX, reboundDistY;
+float Angle;
+float mag;
+float vectormagX;
+float vectormagY;
+float vectorsignX;
+float vectorsignY;
+PFont f;
+int levelchoice = 1;
+float[][] level1 = {{0,100,200}, {0,200,100}, {0,200,300}, {0,300,200}, {0,300,400}, {0,400,300}, {0,400,500}, {0,500,400}};
+//float[][] level2 = {{}};
+//float[][] level3 = {{}};
+//float[][] level4 = {{}};
+
+void setup() {
+  size(600,600);
+  noCursor();
+  vectorsignX = random(0,50);
+  vectorsignY = random(0,50);
+  if (vectorsignX >= 25) {
+    vectorsignX = 1;
+  }
+  else {
+    vectorsignX = -1;
+  }
+  if (vectorsignY >= 25) {
+    vectorsignY = 1;
+  }
+  else {
+    vectorsignY = -1;
+  }
+  vectormagX = sqrt(sq(random(50))/2500);
+  vectormagY = sqrt((2500-sq(vectormagX)*2500)/2500);
+  moveX = moveX+vectormagX*vectorsignX;
+  moveY = moveY+vectormagY*vectorsignY;
+}
+
+void draw() {
+  noStroke();
+  background(0);
+// Bricks in the middle
+    fill(255,255,120);
+    if (levelchoice == 1) {
+      switch (levelchoice) {
+        case 1:
+          for (int i = 0; i<8 ; i++) {
+             for (int j = 1; j<3; j = j+2) {
+               if (level1[i][0] == 0) {
+                 int k = j+1;
+                 rectMode(CENTER);
+                 rect(level1[i][j],level1[i][k],50,10);
+                 ellipse(level1[i][j]+25,level1[i][k],10,10);
+                 ellipse(level1[i][j]-25,level1[i][k],10,10);
+               }
+             }
+          }
+//        level 2:
+//        level 3:
+//        level 4:
+      }
+    }
+// When the ball hits the bricks in the middle, according to the sequence of each bricks in the level1 array
+// First discuss collision with the flat surface in the middle, then the half circumfrance on two sides
+//
+// Collision with bricks at y=100: first the flat surface in the middle then the two sides
+  if ((level1[1][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 100)<= 13 && ballPositionX>= 175 && ballPositionX<= 225)) {
+    level1[1][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[1][0] == 0) && (dist(ballPositionX, ballPositionY, 175, 100)<= 13)) {
+    level1[1][0] = 1;
+    reboundDistX = 175-ballPositionX;
+    reboundDistY = 100-ballPositionY;
+    angleV1 = new PVector( 175-ballPositionX , 100-ballPositionY );
+    angleV2 = new PVector(vectormagX, vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+    else if ((level1[1][0] == 0) && (dist(ballPositionX, ballPositionY, 225, 100)<= 13)) {
+    level1[1][0] = 1;
+    reboundDistX = 225-ballPositionX;
+    reboundDistY = 100-ballPositionY;
+    angleV1 = new PVector( 225-ballPositionX , 100-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  
+// Collision with bricks at y=200, x=100
+  if ((level1[0][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 200)<= 13 && ballPositionX>= 75 && ballPositionX<= 125)) {
+    level1[0][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[0][0] == 0) && (dist(ballPositionX, ballPositionY, 75, 200)<= 13)) {
+    level1[0][0] = 1;
+    reboundDistX = 75-ballPositionX;
+    reboundDistY = 200-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 75-ballPositionX , 200-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[0][0] == 0) && (dist(ballPositionX, ballPositionY, 125, 200)<= 13)) {
+    level1[0][0] = 1;
+    reboundDistX = 125-ballPositionX;
+    reboundDistY = 200-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 125-ballPositionX , 200-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+// Collision with bricks at y=200, x=300
+  if ((level1[3][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 200)<= 13 && ballPositionX>= 275 && ballPositionX<= 325)) {
+    level1[3][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[3][0] == 0) && (dist(ballPositionX, ballPositionY, 275, 200)<= 13)) {
+    level1[3][0] = 1;
+    reboundDistX = 275-ballPositionX;
+    reboundDistY = 200-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 275-ballPositionX , 200-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[3][0] == 0) && (dist(ballPositionX, ballPositionY, 325, 200)<= 13)) {
+    level1[3][0] = 1;
+    reboundDistX = 325-ballPositionX;
+    reboundDistY = 200-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 325-ballPositionX , 200-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+// collision with ball at y = 300, x = 200
+  if ((level1[2][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 300)<= 13 && ballPositionX>= 175 && ballPositionX<= 225)) {
+    level1[2][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[2][0] == 0) && (dist(ballPositionX, ballPositionY, 175, 300)<= 13)) {
+    level1[2][0] = 1;
+    reboundDistX = 175-ballPositionX;
+    reboundDistY = 300-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 175-ballPositionX , 300-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[2][0] == 0) && (dist(ballPositionX, ballPositionY, 225, 300)<= 13)) {
+    level1[2][0] = 1;
+    reboundDistX = 225-ballPositionX;
+    reboundDistY = 300-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 225-ballPositionX , 300-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+// collision with y = 300, x = 400
+  if ((level1[5][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 300)<= 13 && ballPositionX>= 375 && ballPositionX<= 425)) {
+    level1[5][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[5][0] == 0) && (dist(ballPositionX, ballPositionY, 375, 300)<= 13)) {
+    level1[5][0] = 1;
+    reboundDistX = 375-ballPositionX;
+    reboundDistY = 300-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 375-ballPositionX , 300-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[5][0] == 0) && ((dist(ballPositionX, ballPositionY, 425, 300)<= 13))) {
+    level1[5][0] = 1;
+    reboundDistX = 425-ballPositionX;
+    reboundDistY = 300-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 425-ballPositionX , 300-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+//collision with ball at y = 400, x = 300
+  if ((level1[4][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 400)<= 13 && ballPositionX>= 275 && ballPositionX<= 325)) {
+    level1[4][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[4][0] == 0) && (dist(ballPositionX, ballPositionY, 275, 400)<= 13)) {
+    level1[4][0] = 1;
+    reboundDistX = 275-ballPositionX;
+    reboundDistY = 400-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 275-ballPositionX , 400-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[4][0] == 0) && ((dist(ballPositionX, ballPositionY, 325, 400)<= 13))) {
+    level1[4][0] = 1;
+    reboundDistX = 325-ballPositionX;
+    reboundDistY = 400-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 325-ballPositionX , 400-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+//collision with ball at y = 400, x = 500
+  if ((level1[7][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 400)<= 13 && ballPositionX>= 475 && ballPositionX<= 525)) {
+    level1[7][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[7][0] == 0) && (dist(ballPositionX, ballPositionY, 475, 400)<= 13)) {
+    level1[7][0] = 1;
+    reboundDistX = 475-ballPositionX;
+    reboundDistY = 400-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 475-ballPositionX , 400-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[7][0] == 0) && ((dist(ballPositionX, ballPositionY, 525, 400)<= 13))) {
+    level1[7][0] = 1;
+    reboundDistX = 525-ballPositionX;
+    reboundDistY = 400-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 525-ballPositionX , 400-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  
+  if ((level1[6][0] == 0) && (dist(ballPositionX, ballPositionY, ballPositionX, 500)<= 13 && ballPositionX>= 375 && ballPositionX<= 425))  {
+    level1[6][0] = 1;
+    vectorsignY = -1*vectorsignY;
+  }
+  else if ((level1[6][0] == 0) && (dist(ballPositionX, ballPositionY, 375, 500)<= 13)) {
+    level1[6][0] = 1;
+    reboundDistX = 375-ballPositionX;
+    reboundDistY = 500-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 375-ballPositionX , 500-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+  else if ((level1[6][0] == 0) && (dist(ballPositionX, ballPositionY, 425, 500)<= 13)) {
+    level1[6][0] = 1;
+    reboundDistX = 425-ballPositionX;
+    reboundDistY = 500-ballPositionY;
+    vectorX = new PVector(vectormagX,0);
+    vectorY = new PVector(0,vectormagY);
+    angleV1 = new PVector( 425-ballPositionX , 500-ballPositionY );
+    angleV2 = new PVector(vectormagX,vectormagY);
+    reboundUnitVectorY = new PVector ( reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) , reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    reboundUnitVectorX = new PVector ( reboundDistY / sqrt(sq(reboundDistX)+sq(reboundDistY)) , -1 * reboundDistX / sqrt(sq(reboundDistX)+sq(reboundDistY)) );
+    vector = new PVector(vectormagX, vectormagY);
+    mag = vector.mag();
+    Angle = PVector.angleBetween(angleV1,angleV2);
+    tempVectorX = reboundUnitVectorX.mult( mag * sin( Angle ));
+    tempVectorY = reboundUnitVectorY.mult( -1 * mag * cos( Angle ));
+    vector = PVector.add(tempVectorX,tempVectorY);
+    vectormagX = vector.dot(showX);
+    vectormagY = vector.dot(showY);
+  }
+    
+     
+// When the ball hits the sides of the window, and the bricks on the borders
+  if ((clicked != 0 || pressed != 0) && (clicked+pressed)%2 == 1) {
+    if ((ballPositionX+8 <=0 ) || (ballPositionX-8 >=600) || (ballPositionY-8 >=600) || (ballPositionY+8 <=0)) {
+      fill(255);
+      f = createFont("Arial", 60, true);
+      textFont(f,60);
+      text("GAME OVER",120,300);
+    }
+    if (((ballPositionX >=8 && ballPositionX <=18) || (ballPositionY <=592 && ballPositionX >=582)) && (ballPositionY <= mouseY+45 && ballPositionY >= mouseY-45)) {
+      vectorsignX = -1*vectorsignX;  
+    }
+    if (((ballPositionY >=8 && ballPositionY <=18) || (ballPositionY <=592 && ballPositionY >=582)) && (ballPositionX <= mouseX+45 && ballPositionX >= mouseX-45)) {
+      vectorsignY = -1*vectorsignY;
+    }
+    moveX = moveX+vectormagX*vectorsignX;
+    moveY = moveY+vectormagY*vectorsignY;
+    fill(50,250,255);
+    ellipseMode(CENTER);
+    ellipse(300+dirX*(speed*moveX),300+dirY*(speed*moveY),16,16);
+    fill(255);
+    rectMode(CENTER);
+    rect(mouseX,5,90,10);
+    ellipse(mouseX+45,5,10,10);
+    ellipse(mouseX-45,5,10,10);
+    rect(mouseX,595,90,10);
+    ellipse(mouseX+45,595,10,10);
+    ellipse(mouseX-45,595,10,10);
+    rect(5,mouseY,10,90);
+    ellipse(5,mouseY+45,10,10);
+    ellipse(5,mouseY-45,10,10);
+    rect(595,mouseY,10,90);
+    ellipse(595,mouseY+45,10,10);
+    ellipse(595,mouseY-45,10,10);
+    ballPositionX = 300+dirX*(speed*moveX);
+    ballPositionY = 300+dirX*(speed*moveY);
+    cursorX = mouseX;
+    cursorY = mouseY;
+  }
+  else if ((clicked != 0 || pressed != 0) && (clicked+pressed)%2 == 0) {
+    fill(50,250,255);
+    ellipseMode(CENTER);
+    ellipse(300+(speed*moveX),300+(speed*moveY),16,16);
+// Bricks in the middle
+    fill(255,255,120);
+    if (levelchoice == 1) {
+      switch (levelchoice) {
+        case 1:
+          for (int i = 0; i<8 ; i++) {
+             for (int j = 1; j<3; j = j+2) {
+               if (level1[i][0] == 0) {
+                 int k = j+1;
+                 rectMode(CENTER);
+                 rect(level1[i][j],level1[i][k],50,10);
+                 ellipse(level1[i][j]+25,level1[i][k],10,10);
+                 ellipse(level1[i][j]-25,level1[i][k],10,10);
+               }
+             }
+          }
+//        level 2:
+//        level 3:
+//        level 4:
+      }
+    }
+    fill(255);
+    rectMode(CENTER);
+    rect(cursorX,5,90,10);
+    ellipse(cursorX+45,5,10,10);
+    ellipse(cursorX-45,5,10,10);
+    rect(cursorX,595,90,10);
+    ellipse(cursorX+45,595,10,10);
+    ellipse(cursorX-45,595,10,10);
+    rect(5,cursorY,10,90);
+    ellipse(5,cursorY+45,10,10);
+    ellipse(5,cursorY-45,10,10);
+    rect(595,cursorY,10,90);
+    ellipse(595,cursorY+45,10,10);
+    ellipse(595,cursorY-45,10,10);
+  }
+  else {
+    fill(50,250,255);
+    ellipseMode(CENTER);
+    ellipse(300,300,16,16);
+// Bricks in the middle
+    fill(255,255,120);
+    if (levelchoice == 1) {
+      switch (levelchoice) {
+        case 1:
+          for (int i = 0; i<8 ; i++) {
+             for (int j = 1; j<3; j = j+2) {
+               if (level1[i][0] == 0) {
+                 int k = j+1;
+                 rectMode(CENTER);
+                 rect(level1[i][j],level1[i][k],50,10);
+                 ellipse(level1[i][j]+25,level1[i][k],10,10);
+                 ellipse(level1[i][j]-25,level1[i][k],10,10);
+               }
+             }
+          }
+//        level 2:
+//        level 3:
+//        level 4:
+      }
+    }
+    fill(255);
+    rectMode(CENTER);
+    rect(mouseX,5,90,10);
+    ellipse(mouseX+45,5,10,10);
+    ellipse(mouseX-45,5,10,10);
+    rect(mouseX,595,90,10);
+    ellipse(mouseX+45,595,10,10);
+    ellipse(mouseX-45,595,10,10);
+    rect(5,mouseY,10,90);
+    ellipse(5,mouseY+45,10,10);
+    ellipse(5,mouseY-45,10,10);
+    rect(595,mouseY,10,90);
+    ellipse(595,mouseY+45,10,10);
+    ellipse(595,mouseY-45,10,10);
+  }
+}
+
+void mouseClicked() {  
+  clicked ++;
+}
+
+void keyPressed() {
+  if (key == ' ') {
+  pressed ++;
+  }
+}
